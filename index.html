@@ -30,20 +30,24 @@
       z-index: 10000;
       transition: opacity 1s ease;
     }
+    /* Initially center the title */
     #intro-title {
       color: white;
       font-size: 40px;
       font-weight: bold;
-      opacity: 0;
-    }
-    /* When sliding to corner, we add this class to #intro-title */
-    #intro-title.slide-to-corner {
+      opacity: 1;
       position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      transition: all 2s ease;
+    }
+    /* When the class is added, move the title to the upper left */
+    #intro-title.slide-to-corner {
       top: 10px;
       left: 10px;
+      transform: translate(0, 0);
       font-size: 24px;
-      transition: all 1s ease;
-      opacity: 1;
     }
     /* Header with Gradient Mix‑Ins */
     .header {
@@ -154,6 +158,7 @@
     .delete-btn:active {
       transform: scale(0.95);
     }
+    /* Textarea Editing Animation */
     .note-content {
       width: 100%;
       height: 150px;
@@ -259,32 +264,30 @@
     function introSequence() {
       const introOverlay = document.getElementById('intro-overlay');
       const introTitle = document.getElementById('intro-title');
-      const titleText = "Nota";  // Title to be typed out
+      const titleText = "Nota";  // Title text to be typed out
       let index = 0;
 
-      // Typewriter effect: type each character one by one
       function typeWriter() {
         if (index < titleText.length) {
           introTitle.textContent += titleText.charAt(index);
-          introTitle.style.opacity = 1; // Ensure it's visible once typing begins
           index++;
-          setTimeout(typeWriter, 150); // Adjust typing speed (in ms) as desired
+          setTimeout(typeWriter, 300); // Slower typing speed
         } else {
-          // After the title is fully typed, wait briefly
+          // Wait a moment after finishing typing before sliding
           setTimeout(() => {
-            // Slide the intro title to its header position (upper left)
+            // Add the class to slide the title to the upper left smoothly
             introTitle.classList.add('slide-to-corner');
-            // After the slide animation finishes, fade out the overlay
+            // Wait for the slide animation to complete (2s)
             setTimeout(() => {
+              // Fade out the overlay slowly (1s)
               introOverlay.style.opacity = 0;
-              // Remove the overlay from the DOM after fading
               setTimeout(() => {
                 introOverlay.remove();
                 // Finally, show the login prompt
                 NoteManager.showLoginModal();
               }, 1000);
-            }, 1000);
-          }, 500);
+            }, 2000);
+          }, 1000);
         }
       }
       typeWriter();
@@ -296,6 +299,7 @@
         this.checkSession();
         this.loadNotes();
       },
+
       checkSession() {
         const params = new URLSearchParams();
         params.append('action', 'fetch');
@@ -321,6 +325,7 @@
           this.updateHeader(null);
         });
       },
+
       updateHeader(username) {
         const headerTitle = document.getElementById('header-title');
         const logoutBtn = document.getElementById('logout');
@@ -332,6 +337,7 @@
           logoutBtn.style.display = 'none';
         }
       },
+
       showLoginModal() {
         this.closeModal('login-modal');
         const modal = document.createElement('div');
@@ -351,6 +357,7 @@
         `;
         document.body.appendChild(modal);
       },
+
       closeModal(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) {
@@ -358,10 +365,12 @@
           setTimeout(() => modal.remove(), 500);
         }
       },
+
       backToLogin(modalId) {
         this.closeModal(modalId);
         setTimeout(() => this.showLoginModal(), 500);
       },
+
       handleLogin() {
         const username = document.getElementById('login_username').value;
         const password = document.getElementById('login_password').value;
@@ -389,6 +398,7 @@
           }
         });
       },
+
       showRegisterModal() {
         this.closeModal('login-modal');
         const modal = document.createElement('div');
@@ -408,6 +418,7 @@
         `;
         document.body.appendChild(modal);
       },
+
       handleRegister() {
         const username = document.getElementById('reg_username').value;
         const password = document.getElementById('reg_password').value;
@@ -435,6 +446,7 @@
           }
         });
       },
+
       showResetModal() {
         this.closeModal('login-modal');
         const modal = document.createElement('div');
@@ -453,6 +465,7 @@
         `;
         document.body.appendChild(modal);
       },
+
       handleReset() {
         const username = document.getElementById('reset_username').value;
         const security_answer = document.getElementById('reset_security_answer').value;
@@ -479,6 +492,7 @@
           }
         });
       },
+
       handleLogout() {
         fetch('logout.php', {
           method: 'POST',
@@ -493,6 +507,7 @@
         })
         .catch(err => console.error(err));
       },
+
       loadNotes() {
         const params = new URLSearchParams();
         params.append('action', 'fetch');
@@ -508,6 +523,7 @@
           }
         });
       },
+
       renderNotes(notes) {
         const container = document.getElementById('notes-container');
         container.innerHTML = '';
@@ -530,6 +546,7 @@
           container.appendChild(noteEl);
         });
       },
+
       createNote() {
         const params = new URLSearchParams();
         params.append('action', 'create');
@@ -546,6 +563,7 @@
           }
         });
       },
+
       updateNote(noteId, content) {
         const params = new URLSearchParams();
         params.append('action', 'update');
@@ -557,6 +575,7 @@
           body: params.toString()
         });
       },
+
       animateDelete(noteEl, noteId) {
         noteEl.classList.add('note-delete-animation');
         noteEl.addEventListener('animationend', () => {
