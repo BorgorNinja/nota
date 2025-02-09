@@ -158,7 +158,7 @@
     .delete-btn:active {
       transform: scale(0.95);
     }
-    /* Note Footer for Public Toggle & Link */
+    /* Note Footer: Contains the Public toggle and Copy Link button */
     .note-footer {
       margin-top: 10px;
       display: flex;
@@ -205,7 +205,7 @@
     .note-content:focus:invalid {
       outline: 2px solid red;
     }
-    /* Modal Styles (used for login, registration, reset, and custom dialogs) */
+    /* Modal Styles (for login, registration, reset, and custom dialogs) */
     .modal {
       position: fixed;
       top: 0;
@@ -255,15 +255,15 @@
     /* Animations */
     @keyframes fadeIn {
       from { opacity: 0; }
-      to   { opacity: 1; }
+      to { opacity: 1; }
     }
     @keyframes slideIn {
       from { transform: translateY(20px); opacity: 0; }
-      to   { transform: translateY(0); opacity: 1; }
+      to { transform: translateY(0); opacity: 1; }
     }
     @keyframes fadeOut {
       from { opacity: 1; }
-      to   { opacity: 0; }
+      to { opacity: 0; }
     }
     @keyframes slideDownFadeOut {
       from { opacity: 1; transform: translateY(0); }
@@ -275,7 +275,7 @@
   </style>
 </head>
 <body>
-  <!-- Intro Overlay (will be removed if the user is logged in) -->
+  <!-- Intro Overlay (only appears if the user is not logged in) -->
   <div id="intro-overlay">
     <div id="intro-title"></div>
   </div>
@@ -304,15 +304,14 @@
           index++;
           setTimeout(typeWriter, 300); // Slower typing speed
         } else {
-          // Wait a moment before sliding the title to the header position
+          // Pause then slide the title to header position
           setTimeout(() => {
             introTitle.classList.add('slide-to-corner');
-            // Wait for the 2-second slide animation to finish
+            // Wait for the slide animation to finish (2 seconds)
             setTimeout(() => {
               introOverlay.style.opacity = 0;
               setTimeout(() => {
                 introOverlay.remove();
-                // Show login modal after the intro is complete
                 NoteManager.showLoginModal();
               }, 1000);
             }, 2000);
@@ -322,7 +321,7 @@
       typeWriter();
     }
 
-    /* --- CUSTOM DIALOG (replaces browser alert) --- */
+    /* --- CUSTOM DIALOG (in-theme modal instead of browser alert) --- */
     function showCustomDialog(title, message, callback) {
       const dialog = document.createElement('div');
       dialog.className = 'modal';
@@ -351,7 +350,7 @@
         params.append('action', 'fetch');
         fetch('notes.php', {
           method: 'POST',
-          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: params.toString()
         })
         .then(res => res.json())
@@ -424,7 +423,7 @@
         params.append('password', password);
         fetch('login.php', {
           method: 'POST',
-          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: params.toString()
         })
         .then(res => res.json())
@@ -474,7 +473,7 @@
         params.append('security_answer', security_answer);
         fetch('register.php', {
           method: 'POST',
-          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: params.toString()
         })
         .then(res => res.json())
@@ -516,7 +515,7 @@
         params.append('new_password', new_password);
         fetch('reset_password.php', {
           method: 'POST',
-          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: params.toString()
         })
         .then(res => res.json())
@@ -548,7 +547,7 @@
         params.append('action', 'fetch');
         fetch('notes.php', {
           method: 'POST',
-          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: params.toString()
         })
         .then(res => res.json())
@@ -572,22 +571,26 @@
             <textarea class="note-content">${note.content}</textarea>
             <div class="note-footer">
               <label>
-                <input type="checkbox" class="public-toggle" ${note.is_public ? "checked" : ""}>
+                <input type="checkbox" class="public-toggle" ${parseInt(note.is_public) === 1 ? "checked" : ""}>
                 Public
               </label>
-              ${ note.is_public ? `<button class="copy-link-btn">Copy Link</button>` : "" }
+              ${ parseInt(note.is_public) === 1 ? `<button class="copy-link-btn">Copy Link</button>` : "" }
             </div>
           `;
+          // Delete note event
           noteEl.querySelector('.delete-btn').addEventListener('click', () => {
             this.animateDelete(noteEl, note.id);
           });
+          // Update note content event
           noteEl.querySelector('.note-content').addEventListener('input', (e) => {
             this.updateNote(note.id, e.target.value);
           });
+          // Public toggle change event
           const toggle = noteEl.querySelector('.public-toggle');
           toggle.addEventListener('change', (e) => {
             this.togglePublic(note.id, e.target.checked);
           });
+          // If note is public, bind Copy Link button event
           const copyBtn = noteEl.querySelector('.copy-link-btn');
           if (copyBtn) {
             copyBtn.addEventListener('click', () => {
@@ -604,7 +607,7 @@
         params.append('content', 'New note...');
         fetch('notes.php', {
           method: 'POST',
-          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: params.toString()
         })
         .then(res => res.json())
@@ -621,7 +624,7 @@
         params.append('content', content);
         fetch('notes.php', {
           method: 'POST',
-          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: params.toString()
         });
       },
@@ -632,7 +635,7 @@
         params.append('public', isPublic ? 1 : 0);
         fetch('notes.php', {
           method: 'POST',
-          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: params.toString()
         })
         .then(res => res.json())
@@ -652,7 +655,7 @@
           params.append('note_id', noteId);
           fetch('notes.php', {
             method: 'POST',
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: params.toString()
           })
           .then(res => res.json())
@@ -663,15 +666,15 @@
               showCustomDialog("Error", "Error deleting note.");
             }
           });
-        }, {once: true});
+        }, { once: true });
       }
     };
 
     document.addEventListener('DOMContentLoaded', () => {
-      // Check if a username is stored in localStorage (meaning user is logged in)
+      // If a username is stored in localStorage, assume the user is logged in,
+      // initialize the app, and remove the intro overlay.
       if (localStorage.getItem('username')) {
         NoteManager.init();
-        // Remove the intro overlay if it exists.
         const introOverlay = document.getElementById('intro-overlay');
         if (introOverlay) introOverlay.remove();
       } else {
