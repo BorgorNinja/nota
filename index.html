@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nota</title>
+  <style>
+    /* Base Styles */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #9975e5;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    /* Intro Overlay & Typewriter Styles */
+    #intro-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      transition: opacity 1s ease;
+    }
+    #intro-title {
+      color: white;
+      font-size: 40px;
+      font-weight: bold;
+      opacity: 0;
+    }
+    /* When sliding to corner, we add this class to #intro-title */
+    #intro-title.slide-to-corner {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 24px;
+      transition: all 1s ease;
+      opacity: 1;
+    }
+    /* Header with Gradient Mix‑Ins */
+    .header {
+      background: linear-gradient(135deg, #6b4fd3, #2b1063);
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      box-sizing: border-box;
+      z-index: 10;
+    }
+    .header::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 100px;
+      height: 50px;
+      background: linear-gradient(135deg, #2b1063, #6b4fd3);
+      clip-path: polygon(100% 100%, 0 100%, 100% 0);
+      z-index: -1;
+    }
+    #logout {
+      background: pink;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-weight: bold;
+      position: relative;
+      z-index: 11;
+      transition: transform 0.2s ease;
+    }
+    #logout:active {
+      transform: scale(0.95);
+    }
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 80px;
+      box-sizing: border-box;
+      padding: 0 10px;
+    }
+    .add-button {
+      width: 50px;
+      height: 50px;
+      background: pink;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-bottom: 20px;
+      transition: transform 0.2s ease;
+    }
+    .add-button:active {
+      transform: scale(0.95);
+    }
+    /* Grid Container for Notes */
+    #notes-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 10px;
+      width: 100%;
+      animation: fadeIn 0.5s ease;
+    }
+    /* Note Styles */
+    .note {
+      background: white;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      animation: slideIn 0.5s ease;
+    }
+    .note-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      color: #2b1063;
+      font-size: 14px;
+    }
+    .delete-btn {
+      background: pink;
+      border: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform 0.2s ease;
+    }
+    .delete-btn:active {
+      transform: scale(0.95);
+    }
+    .note-content {
+      width: 100%;
+      height: 150px;
+      border: none;
+      resize: none;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      transition: transform 0.3s ease, height 0.3s ease;
+    }
+    .note-content:focus {
+      transform: scale(1.05);
+      height: 200px;
+    }
+    .note-content:focus:invalid {
+      outline: 2px solid red;
+    }
+    /* Modal Styles */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      animation: fadeIn 0.5s ease;
+    }
+    .modal-content {
+      background: linear-gradient(135deg, #6b4fd3, #2b1063);
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      color: white;
+      animation: slideIn 0.5s ease;
+      width: 90%;
+      max-width: 400px;
+    }
+    .modal-content input {
+      padding: 10px;
+      margin: 10px;
+      border-radius: 5px;
+      border: none;
+      width: 80%;
+      transition: transform 0.2s ease;
+    }
+    .modal-content input:active {
+      transform: scale(0.95);
+    }
+    .modal-content button {
+      background: pink;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: transform 0.2s ease;
+    }
+    .modal-content button:active {
+      transform: scale(0.95);
+    }
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+    @keyframes slideDownFadeOut {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(20px); }
+    }
+    .note-delete-animation {
+      animation: slideDownFadeOut 0.5s ease forwards;
+    }
+  </style>
+</head>
+<body>
+  <!-- Intro Overlay -->
+  <div id="intro-overlay">
+    <div id="intro-title"></div>
+  </div>
+
+  <div class="header">
+    <div id="header-title">Nota</div>
+    <button id="logout" onclick="NoteManager.handleLogout()">Logout</button>
+  </div>
+  <div class="container">
+    <div class="add-button" onclick="NoteManager.createNote()">+</div>
+    <div id="notes-container"></div>
+  </div>
+
+  <script>
+    /* --- INTRO SEQUENCE --- */
+    function introSequence() {
+      const introOverlay = document.getElementById('intro-overlay');
+      const introTitle = document.getElementById('intro-title');
+      const titleText = "Nota";  // Title to be typed out
+      let index = 0;
+
+      // Typewriter effect: type each character one by one
+      function typeWriter() {
+        if (index < titleText.length) {
+          introTitle.textContent += titleText.charAt(index);
+          introTitle.style.opacity = 1; // Ensure it's visible once typing begins
+          index++;
+          setTimeout(typeWriter, 150); // Adjust typing speed (in ms) as desired
+        } else {
+          // After the title is fully typed, wait briefly
+          setTimeout(() => {
+            // Slide the intro title to its header position (upper left)
+            introTitle.classList.add('slide-to-corner');
+            // After the slide animation finishes, fade out the overlay
+            setTimeout(() => {
+              introOverlay.style.opacity = 0;
+              // Remove the overlay from the DOM after fading
+              setTimeout(() => {
+                introOverlay.remove();
+                // Finally, show the login prompt
+                NoteManager.showLoginModal();
+              }, 1000);
+            }, 1000);
+          }, 500);
+        }
+      }
+      typeWriter();
+    }
+
+    /* --- NOTE MANAGER & LOGIN/REGISTRATION/NOTES FUNCTIONS --- */
+    const NoteManager = {
+      init() {
+        this.checkSession();
+        this.loadNotes();
+      },
+      checkSession() {
+        const params = new URLSearchParams();
+        params.append('action', 'fetch');
+        fetch('notes.php', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          body: params.toString()
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (!data.success) {
+            this.showLoginModal();
+            this.updateHeader(null);
+          } else {
+            const username = sessionStorage.getItem('username') || 'User';
+            this.updateHeader(username);
+            this.renderNotes(data.notes);
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          this.showLoginModal();
+          this.updateHeader(null);
+        });
+      },
+      updateHeader(username) {
+        const headerTitle = document.getElementById('header-title');
+        const logoutBtn = document.getElementById('logout');
+        if (username) {
+          headerTitle.textContent = `Nota - ${username}`;
+          logoutBtn.style.display = 'block';
+        } else {
+          headerTitle.textContent = 'Nota';
+          logoutBtn.style.display = 'none';
+        }
+      },
+      showLoginModal() {
+        this.closeModal('login-modal');
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.id = 'login-modal';
+        modal.innerHTML = `
+          <div class="modal-content">
+            <h3>Login to Nota</h3>
+            <input type="text" id="login_username" placeholder="Username">
+            <input type="password" id="login_password" placeholder="Password">
+            <button onclick="NoteManager.handleLogin()">Login</button>
+            <br>
+            <button onclick="NoteManager.showRegisterModal()">Register</button>
+            <br>
+            <button onclick="NoteManager.showResetModal()">Forgot Password?</button>
+          </div>
+        `;
+        document.body.appendChild(modal);
+      },
+      closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+          modal.style.animation = 'fadeOut 0.5s ease forwards';
+          setTimeout(() => modal.remove(), 500);
+        }
+      },
+      backToLogin(modalId) {
+        this.closeModal(modalId);
+        setTimeout(() => this.showLoginModal(), 500);
+      },
+      handleLogin() {
+        const username = document.getElementById('login_username').value;
+        const password = document.getElementById('login_password').value;
+        if (!username || !password) {
+          alert('Please enter username and password.');
+          return;
+        }
+        const params = new URLSearchParams();
+        params.append('username', username);
+        params.append('password', password);
+        fetch('login.php', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          body: params.toString()
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            sessionStorage.setItem('username', data.username);
+            this.updateHeader(data.username);
+            this.closeModal('login-modal');
+            this.loadNotes();
+          } else {
+            alert(data.message);
+          }
+        });
+      },
+      showRegisterModal() {
+        this.closeModal('login-modal');
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.id = 'register-modal';
+        modal.innerHTML = `
+          <div class="modal-content">
+            <h3>Register for Nota</h3>
+            <input type="text" id="reg_username" placeholder="Username">
+            <input type="password" id="reg_password" placeholder="Password">
+            <input type="text" id="reg_security_question" placeholder="Security Question">
+            <input type="text" id="reg_security_answer" placeholder="Security Answer">
+            <button onclick="NoteManager.handleRegister()">Register</button>
+            <br>
+            <button onclick="NoteManager.backToLogin('register-modal')">Back to Login</button>
+          </div>
+        `;
+        document.body.appendChild(modal);
+      },
+      handleRegister() {
+        const username = document.getElementById('reg_username').value;
+        const password = document.getElementById('reg_password').value;
+        const security_question = document.getElementById('reg_security_question').value;
+        const security_answer = document.getElementById('reg_security_answer').value;
+        if (!username || !password || !security_question || !security_answer) {
+          alert('All fields are required.');
+          return;
+        }
+        const params = new URLSearchParams();
+        params.append('username', username);
+        params.append('password', password);
+        params.append('security_question', security_question);
+        params.append('security_answer', security_answer);
+        fetch('register.php', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          body: params.toString()
+        })
+        .then(res => res.json())
+        .then(data => {
+          alert(data.message);
+          if (data.success) {
+            location.reload();
+          }
+        });
+      },
+      showResetModal() {
+        this.closeModal('login-modal');
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.id = 'reset-modal';
+        modal.innerHTML = `
+          <div class="modal-content">
+            <h3>Reset Password</h3>
+            <input type="text" id="reset_username" placeholder="Username">
+            <input type="text" id="reset_security_answer" placeholder="Security Answer">
+            <input type="password" id="reset_new_password" placeholder="New Password">
+            <button onclick="NoteManager.handleReset()">Reset Password</button>
+            <br>
+            <button onclick="NoteManager.backToLogin('reset-modal')">Back to Login</button>
+          </div>
+        `;
+        document.body.appendChild(modal);
+      },
+      handleReset() {
+        const username = document.getElementById('reset_username').value;
+        const security_answer = document.getElementById('reset_security_answer').value;
+        const new_password = document.getElementById('reset_new_password').value;
+        if (!username || !security_answer || !new_password) {
+          alert('All fields are required.');
+          return;
+        }
+        const params = new URLSearchParams();
+        params.append('username', username);
+        params.append('security_answer', security_answer);
+        params.append('new_password', new_password);
+        fetch('reset_password.php', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          body: params.toString()
+        })
+        .then(res => res.json())
+        .then(data => {
+          alert(data.message);
+          if (data.success) {
+            this.closeModal('reset-modal');
+            this.showLoginModal();
+          }
+        });
+      },
+      handleLogout() {
+        fetch('logout.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            sessionStorage.removeItem('username');
+            location.reload();
+          }
+        })
+        .catch(err => console.error(err));
+      },
+      loadNotes() {
+        const params = new URLSearchParams();
+        params.append('action', 'fetch');
+        fetch('notes.php', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          body: params.toString()
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            this.renderNotes(data.notes);
+          }
+        });
+      },
+      renderNotes(notes) {
+        const container = document.getElementById('notes-container');
+        container.innerHTML = '';
+        notes.forEach(note => {
+          const noteEl = document.createElement('div');
+          noteEl.className = 'note';
+          noteEl.innerHTML = `
+            <div class="note-header">
+              <span>${new Date(note.updated_at).toLocaleString()}</span>
+              <button class="delete-btn">×</button>
+            </div>
+            <textarea class="note-content">${note.content}</textarea>
+          `;
+          noteEl.querySelector('.delete-btn').addEventListener('click', () => {
+            this.animateDelete(noteEl, note.id);
+          });
+          noteEl.querySelector('.note-content').addEventListener('input', (e) => {
+            this.updateNote(note.id, e.target.value);
+          });
+          container.appendChild(noteEl);
+        });
+      },
+      createNote() {
+        const params = new URLSearchParams();
+        params.append('action', 'create');
+        params.append('content', 'New note...');
+        fetch('notes.php', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          body: params.toString()
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            this.loadNotes();
+          }
+        });
+      },
+      updateNote(noteId, content) {
+        const params = new URLSearchParams();
+        params.append('action', 'update');
+        params.append('note_id', noteId);
+        params.append('content', content);
+        fetch('notes.php', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          body: params.toString()
+        });
+      },
+      animateDelete(noteEl, noteId) {
+        noteEl.classList.add('note-delete-animation');
+        noteEl.addEventListener('animationend', () => {
+          const params = new URLSearchParams();
+          params.append('action', 'delete');
+          params.append('note_id', noteId);
+          fetch('notes.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: params.toString()
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              noteEl.remove();
+            } else {
+              alert("Error deleting note.");
+            }
+          });
+        }, {once: true});
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Start the intro sequence on page load.
+      introSequence();
+    });
+    window.NoteManager = NoteManager;
+  </script>
+</body>
+</html>
