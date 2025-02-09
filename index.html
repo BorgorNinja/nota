@@ -30,7 +30,7 @@
       z-index: 10000;
       transition: opacity 1s ease;
     }
-    /* Initially center the title */
+    /* Initially center the intro title */
     #intro-title {
       color: white;
       font-size: 40px;
@@ -42,7 +42,7 @@
       transform: translate(-50%, -50%);
       transition: all 2s ease;
     }
-    /* When the class is added, move the title to the upper left */
+    /* When the class is added, slide the title to the upper left */
     #intro-title.slide-to-corner {
       top: 10px;
       left: 10px;
@@ -141,7 +141,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 5px;
       color: #2b1063;
       font-size: 14px;
     }
@@ -156,6 +156,36 @@
       transition: transform 0.2s ease;
     }
     .delete-btn:active {
+      transform: scale(0.95);
+    }
+    /* Note Footer for Public Toggle & Link */
+    .note-footer {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #2b1063;
+    }
+    .note-footer label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    .note-footer input[type="checkbox"] {
+      margin-right: 5px;
+      cursor: pointer;
+    }
+    .copy-link-btn {
+      background: pink;
+      border: none;
+      border-radius: 5px;
+      padding: 3px 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .copy-link-btn:active {
       transform: scale(0.95);
     }
     /* Textarea Editing Animation */
@@ -175,7 +205,7 @@
     .note-content:focus:invalid {
       outline: 2px solid red;
     }
-    /* Modal Styles */
+    /* Modal Styles (used for login, registration, reset, and custom dialogs) */
     .modal {
       position: fixed;
       top: 0;
@@ -225,15 +255,15 @@
     /* Animations */
     @keyframes fadeIn {
       from { opacity: 0; }
-      to { opacity: 1; }
+      to   { opacity: 1; }
     }
     @keyframes slideIn {
       from { transform: translateY(20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+      to   { transform: translateY(0); opacity: 1; }
     }
     @keyframes fadeOut {
       from { opacity: 1; }
-      to { opacity: 0; }
+      to   { opacity: 0; }
     }
     @keyframes slideDownFadeOut {
       from { opacity: 1; transform: translateY(0); }
@@ -245,7 +275,7 @@
   </style>
 </head>
 <body>
-  <!-- Intro Overlay -->
+  <!-- Intro Overlay (will be removed if the user is logged in) -->
   <div id="intro-overlay">
     <div id="intro-title"></div>
   </div>
@@ -264,26 +294,25 @@
     function introSequence() {
       const introOverlay = document.getElementById('intro-overlay');
       const introTitle = document.getElementById('intro-title');
-      const titleText = "Nota";  // Title text to be typed out
+      const titleText = "Nota";
       let index = 0;
-
+      introTitle.textContent = "";
+      
       function typeWriter() {
         if (index < titleText.length) {
           introTitle.textContent += titleText.charAt(index);
           index++;
           setTimeout(typeWriter, 300); // Slower typing speed
         } else {
-          // Wait a moment after finishing typing before sliding
+          // Wait a moment before sliding the title to the header position
           setTimeout(() => {
-            // Add the class to slide the title to the upper left smoothly
             introTitle.classList.add('slide-to-corner');
-            // Wait for the slide animation to complete (2s)
+            // Wait for the 2-second slide animation to finish
             setTimeout(() => {
-              // Fade out the overlay slowly (1s)
               introOverlay.style.opacity = 0;
               setTimeout(() => {
                 introOverlay.remove();
-                // Finally, show the login prompt
+                // Show login modal after the intro is complete
                 NoteManager.showLoginModal();
               }, 1000);
             }, 2000);
@@ -293,13 +322,30 @@
       typeWriter();
     }
 
+    /* --- CUSTOM DIALOG (replaces browser alert) --- */
+    function showCustomDialog(title, message, callback) {
+      const dialog = document.createElement('div');
+      dialog.className = 'modal';
+      dialog.innerHTML = `
+        <div class="modal-content">
+          <h3>${title}</h3>
+          <p>${message}</p>
+          <button id="dialog-ok-btn">OK</button>
+        </div>
+      `;
+      document.body.appendChild(dialog);
+      document.getElementById('dialog-ok-btn').addEventListener('click', () => {
+        dialog.style.animation = 'fadeOut 0.5s ease forwards';
+        setTimeout(() => { dialog.remove(); if (callback) callback(); }, 500);
+      });
+    }
+
     /* --- NOTE MANAGER & LOGIN/REGISTRATION/NOTES FUNCTIONS --- */
     const NoteManager = {
       init() {
         this.checkSession();
         this.loadNotes();
       },
-
       checkSession() {
         const params = new URLSearchParams();
         params.append('action', 'fetch');
@@ -314,7 +360,7 @@
             this.showLoginModal();
             this.updateHeader(null);
           } else {
-            const username = sessionStorage.getItem('username') || 'User';
+            const username = localStorage.getItem('username') || 'User';
             this.updateHeader(username);
             this.renderNotes(data.notes);
           }
@@ -325,7 +371,6 @@
           this.updateHeader(null);
         });
       },
-
       updateHeader(username) {
         const headerTitle = document.getElementById('header-title');
         const logoutBtn = document.getElementById('logout');
@@ -337,7 +382,6 @@
           logoutBtn.style.display = 'none';
         }
       },
-
       showLoginModal() {
         this.closeModal('login-modal');
         const modal = document.createElement('div');
@@ -357,7 +401,6 @@
         `;
         document.body.appendChild(modal);
       },
-
       closeModal(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) {
@@ -365,17 +408,15 @@
           setTimeout(() => modal.remove(), 500);
         }
       },
-
       backToLogin(modalId) {
         this.closeModal(modalId);
         setTimeout(() => this.showLoginModal(), 500);
       },
-
       handleLogin() {
         const username = document.getElementById('login_username').value;
         const password = document.getElementById('login_password').value;
         if (!username || !password) {
-          alert('Please enter username and password.');
+          showCustomDialog("Error", "Please enter username and password.");
           return;
         }
         const params = new URLSearchParams();
@@ -389,16 +430,15 @@
         .then(res => res.json())
         .then(data => {
           if (data.success) {
-            sessionStorage.setItem('username', data.username);
+            localStorage.setItem('username', data.username);
             this.updateHeader(data.username);
             this.closeModal('login-modal');
             this.loadNotes();
           } else {
-            alert(data.message);
+            showCustomDialog("Login Error", data.message);
           }
         });
       },
-
       showRegisterModal() {
         this.closeModal('login-modal');
         const modal = document.createElement('div');
@@ -418,14 +458,13 @@
         `;
         document.body.appendChild(modal);
       },
-
       handleRegister() {
         const username = document.getElementById('reg_username').value;
         const password = document.getElementById('reg_password').value;
         const security_question = document.getElementById('reg_security_question').value;
         const security_answer = document.getElementById('reg_security_answer').value;
         if (!username || !password || !security_question || !security_answer) {
-          alert('All fields are required.');
+          showCustomDialog("Error", "All fields are required.");
           return;
         }
         const params = new URLSearchParams();
@@ -440,13 +479,11 @@
         })
         .then(res => res.json())
         .then(data => {
-          alert(data.message);
-          if (data.success) {
-            location.reload();
-          }
+          showCustomDialog("Registration", data.message, () => {
+            if (data.success) location.reload();
+          });
         });
       },
-
       showResetModal() {
         this.closeModal('login-modal');
         const modal = document.createElement('div');
@@ -465,13 +502,12 @@
         `;
         document.body.appendChild(modal);
       },
-
       handleReset() {
         const username = document.getElementById('reset_username').value;
         const security_answer = document.getElementById('reset_security_answer').value;
         const new_password = document.getElementById('reset_new_password').value;
         if (!username || !security_answer || !new_password) {
-          alert('All fields are required.');
+          showCustomDialog("Error", "All fields are required.");
           return;
         }
         const params = new URLSearchParams();
@@ -485,14 +521,14 @@
         })
         .then(res => res.json())
         .then(data => {
-          alert(data.message);
-          if (data.success) {
-            this.closeModal('reset-modal');
-            this.showLoginModal();
-          }
+          showCustomDialog("Reset Password", data.message, () => {
+            if (data.success) {
+              this.closeModal('reset-modal');
+              this.showLoginModal();
+            }
+          });
         });
       },
-
       handleLogout() {
         fetch('logout.php', {
           method: 'POST',
@@ -501,13 +537,12 @@
         .then(res => res.json())
         .then(data => {
           if (data.success) {
-            sessionStorage.removeItem('username');
+            localStorage.removeItem('username');
             location.reload();
           }
         })
         .catch(err => console.error(err));
       },
-
       loadNotes() {
         const params = new URLSearchParams();
         params.append('action', 'fetch');
@@ -523,10 +558,9 @@
           }
         });
       },
-
       renderNotes(notes) {
         const container = document.getElementById('notes-container');
-        container.innerHTML = '';
+        container.innerHTML = "";
         notes.forEach(note => {
           const noteEl = document.createElement('div');
           noteEl.className = 'note';
@@ -536,6 +570,13 @@
               <button class="delete-btn">×</button>
             </div>
             <textarea class="note-content">${note.content}</textarea>
+            <div class="note-footer">
+              <label>
+                <input type="checkbox" class="public-toggle" ${note.is_public ? "checked" : ""}>
+                Public
+              </label>
+              ${ note.is_public ? `<button class="copy-link-btn">Copy Link</button>` : "" }
+            </div>
           `;
           noteEl.querySelector('.delete-btn').addEventListener('click', () => {
             this.animateDelete(noteEl, note.id);
@@ -543,10 +584,20 @@
           noteEl.querySelector('.note-content').addEventListener('input', (e) => {
             this.updateNote(note.id, e.target.value);
           });
+          const toggle = noteEl.querySelector('.public-toggle');
+          toggle.addEventListener('change', (e) => {
+            this.togglePublic(note.id, e.target.checked);
+          });
+          const copyBtn = noteEl.querySelector('.copy-link-btn');
+          if (copyBtn) {
+            copyBtn.addEventListener('click', () => {
+              const publicURL = window.location.origin + "/public_note.php?token=" + note.public_token;
+              showCustomDialog("Share Note", `Public Link:<br><a href="${publicURL}" target="_blank" style="color:#fff;text-decoration:underline;">${publicURL}</a>`);
+            });
+          }
           container.appendChild(noteEl);
         });
       },
-
       createNote() {
         const params = new URLSearchParams();
         params.append('action', 'create');
@@ -563,7 +614,6 @@
           }
         });
       },
-
       updateNote(noteId, content) {
         const params = new URLSearchParams();
         params.append('action', 'update');
@@ -575,7 +625,25 @@
           body: params.toString()
         });
       },
-
+      togglePublic(noteId, isPublic) {
+        const params = new URLSearchParams();
+        params.append('action', 'toggle_public');
+        params.append('note_id', noteId);
+        params.append('public', isPublic ? 1 : 0);
+        fetch('notes.php', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          body: params.toString()
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            this.loadNotes();
+          } else {
+            showCustomDialog("Error", data.message);
+          }
+        });
+      },
       animateDelete(noteEl, noteId) {
         noteEl.classList.add('note-delete-animation');
         noteEl.addEventListener('animationend', () => {
@@ -592,7 +660,7 @@
             if (data.success) {
               noteEl.remove();
             } else {
-              alert("Error deleting note.");
+              showCustomDialog("Error", "Error deleting note.");
             }
           });
         }, {once: true});
@@ -600,8 +668,15 @@
     };
 
     document.addEventListener('DOMContentLoaded', () => {
-      // Start the intro sequence on page load.
-      introSequence();
+      // Check if a username is stored in localStorage (meaning user is logged in)
+      if (localStorage.getItem('username')) {
+        NoteManager.init();
+        // Remove the intro overlay if it exists.
+        const introOverlay = document.getElementById('intro-overlay');
+        if (introOverlay) introOverlay.remove();
+      } else {
+        introSequence();
+      }
     });
     window.NoteManager = NoteManager;
   </script>
