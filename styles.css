@@ -255,6 +255,9 @@ body {
   width: 80%;
   height: 35px;
 }
+.modal-contet button:active {
+  transform: scale(0.95);
+}
 .modal-content .subtext {
   background: none;
   color: white;
