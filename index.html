@@ -30,7 +30,7 @@
       z-index: 10000;
       transition: opacity 1s ease;
     }
-    /* Initially center the intro title */
+    /* Center the intro title initially */
     #intro-title {
       color: white;
       font-size: 40px;
@@ -42,14 +42,14 @@
       transform: translate(-50%, -50%);
       transition: all 2s ease;
     }
-    /* When the class is added, slide the title to the upper left */
+    /* Slide title to upper left */
     #intro-title.slide-to-corner {
       top: 10px;
       left: 10px;
       transform: translate(0, 0);
       font-size: 24px;
     }
-    /* Header with Gradient Mix‑Ins */
+    /* Header with Gradient */
     .header {
       background: linear-gradient(135deg, #6b4fd3, #2b1063);
       color: white;
@@ -158,7 +158,7 @@
     .delete-btn:active {
       transform: scale(0.95);
     }
-    /* Note Footer: Contains the Public toggle and Copy Link button */
+    /* Note Footer: Public toggle and Copy Link button */
     .note-footer {
       margin-top: 10px;
       display: flex;
@@ -205,7 +205,7 @@
     .note-content:focus:invalid {
       outline: 2px solid red;
     }
-    /* Modal Styles (for login, registration, reset, and custom dialogs) */
+    /* Modal Styles (login, registration, reset, custom dialogs) */
     .modal {
       position: fixed;
       top: 0;
@@ -275,7 +275,7 @@
   </style>
 </head>
 <body>
-  <!-- Intro Overlay (only appears if the user is not logged in) -->
+  <!-- Intro Overlay (only if not logged in) -->
   <div id="intro-overlay">
     <div id="intro-title"></div>
   </div>
@@ -302,12 +302,11 @@
         if (index < titleText.length) {
           introTitle.textContent += titleText.charAt(index);
           index++;
-          setTimeout(typeWriter, 300); // Slower typing speed
+          setTimeout(typeWriter, 300);
         } else {
-          // Pause then slide the title to header position
+          // After typing, slide the title to header position.
           setTimeout(() => {
             introTitle.classList.add('slide-to-corner');
-            // Wait for the slide animation to finish (2 seconds)
             setTimeout(() => {
               introOverlay.style.opacity = 0;
               setTimeout(() => {
@@ -321,7 +320,7 @@
       typeWriter();
     }
 
-    /* --- CUSTOM DIALOG (in-theme modal instead of browser alert) --- */
+    /* --- CUSTOM DIALOG --- */
     function showCustomDialog(title, message, callback) {
       const dialog = document.createElement('div');
       dialog.className = 'modal';
@@ -339,7 +338,7 @@
       });
     }
 
-    /* --- NOTE MANAGER & LOGIN/REGISTRATION/NOTES FUNCTIONS --- */
+    /* --- NOTE MANAGER FUNCTIONS --- */
     const NoteManager = {
       init() {
         this.checkSession();
@@ -355,6 +354,7 @@
         })
         .then(res => res.json())
         .then(data => {
+          console.log("CheckSession Response:", data);
           if (!data.success) {
             this.showLoginModal();
             this.updateHeader(null);
@@ -428,6 +428,7 @@
         })
         .then(res => res.json())
         .then(data => {
+          console.log("Login Response:", data);
           if (data.success) {
             localStorage.setItem('username', data.username);
             this.updateHeader(data.username);
@@ -436,7 +437,8 @@
           } else {
             showCustomDialog("Login Error", data.message);
           }
-        });
+        })
+        .catch(err => console.error(err));
       },
       showRegisterModal() {
         this.closeModal('login-modal');
@@ -478,10 +480,12 @@
         })
         .then(res => res.json())
         .then(data => {
+          console.log("Register Response:", data);
           showCustomDialog("Registration", data.message, () => {
             if (data.success) location.reload();
           });
-        });
+        })
+        .catch(err => console.error(err));
       },
       showResetModal() {
         this.closeModal('login-modal');
@@ -520,13 +524,15 @@
         })
         .then(res => res.json())
         .then(data => {
+          console.log("Reset Password Response:", data);
           showCustomDialog("Reset Password", data.message, () => {
             if (data.success) {
               this.closeModal('reset-modal');
               this.showLoginModal();
             }
           });
-        });
+        })
+        .catch(err => console.error(err));
       },
       handleLogout() {
         fetch('logout.php', {
@@ -535,6 +541,7 @@
         })
         .then(res => res.json())
         .then(data => {
+          console.log("Logout Response:", data);
           if (data.success) {
             localStorage.removeItem('username');
             location.reload();
@@ -552,10 +559,12 @@
         })
         .then(res => res.json())
         .then(data => {
+          console.log("Load Notes Response:", data);
           if (data.success) {
             this.renderNotes(data.notes);
           }
-        });
+        })
+        .catch(err => console.error(err));
       },
       renderNotes(notes) {
         const container = document.getElementById('notes-container');
@@ -574,23 +583,23 @@
                 <input type="checkbox" class="public-toggle" ${parseInt(note.is_public) === 1 ? "checked" : ""}>
                 Public
               </label>
-              ${ parseInt(note.is_public) === 1 ? `<button class="copy-link-btn">Copy Link</button>` : "" }
+              ${ parseInt(note.is_public) === 1 && note.public_token ? `<button class="copy-link-btn">Copy Link</button>` : "" }
             </div>
           `;
-          // Delete note event
+          // Delete event
           noteEl.querySelector('.delete-btn').addEventListener('click', () => {
             this.animateDelete(noteEl, note.id);
           });
-          // Update note content event
+          // Update content event
           noteEl.querySelector('.note-content').addEventListener('input', (e) => {
             this.updateNote(note.id, e.target.value);
           });
-          // Public toggle change event
+          // Public toggle event
           const toggle = noteEl.querySelector('.public-toggle');
           toggle.addEventListener('change', (e) => {
             this.togglePublic(note.id, e.target.checked);
           });
-          // If note is public, bind Copy Link button event
+          // Copy Link event
           const copyBtn = noteEl.querySelector('.copy-link-btn');
           if (copyBtn) {
             copyBtn.addEventListener('click', () => {
@@ -612,10 +621,12 @@
         })
         .then(res => res.json())
         .then(data => {
+          console.log("Create Note Response:", data);
           if (data.success) {
             this.loadNotes();
           }
-        });
+        })
+        .catch(err => console.error(err));
       },
       updateNote(noteId, content) {
         const params = new URLSearchParams();
@@ -626,7 +637,7 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: params.toString()
-        });
+        }).catch(err => console.error(err));
       },
       togglePublic(noteId, isPublic) {
         const params = new URLSearchParams();
@@ -640,12 +651,14 @@
         })
         .then(res => res.json())
         .then(data => {
+          console.log("Toggle Public Response:", data);
           if (data.success) {
             this.loadNotes();
           } else {
             showCustomDialog("Error", data.message);
           }
-        });
+        })
+        .catch(err => console.error(err));
       },
       animateDelete(noteEl, noteId) {
         noteEl.classList.add('note-delete-animation');
@@ -660,19 +673,19 @@
           })
           .then(res => res.json())
           .then(data => {
+            console.log("Delete Note Response:", data);
             if (data.success) {
               noteEl.remove();
             } else {
               showCustomDialog("Error", "Error deleting note.");
             }
-          });
+          })
+          .catch(err => console.error(err));
         }, { once: true });
       }
     };
 
     document.addEventListener('DOMContentLoaded', () => {
-      // If a username is stored in localStorage, assume the user is logged in,
-      // initialize the app, and remove the intro overlay.
       if (localStorage.getItem('username')) {
         NoteManager.init();
         const introOverlay = document.getElementById('intro-overlay');
