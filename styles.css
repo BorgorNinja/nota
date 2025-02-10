@@ -1,0 +1,284 @@
+/* Base Styles */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #ebe3fa;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+/* Intro Overlay & Typewriter Styles */
+#intro-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #6b4fd3, #2b1063);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  transition: opacity 1s ease;
+}
+/* Initially center the title */
+#intro-title {
+  color: white;
+  font-size: 64px;
+  font-weight: bold;
+  opacity: 1;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 2s ease;
+}
+/* When the class is added, move the title to the upper left */
+#intro-title.slide-to-corner {
+  top: 0;
+  left: 0;
+  padding: 15px 30px 0px;
+  transform: translate(0, 0);
+  font-size: 24px;
+}
+/* Header with Gradient Mix‑Ins */
+.header {
+  background: linear-gradient(135deg, #6b4fd3, #2b1063);
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  padding: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  box-sizing: border-box;
+  z-index: 10;
+}
+.header::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 100px;
+  height: 50px;
+  background: linear-gradient(135deg, #2b1063, #6b4fd3);
+  clip-path: polygon(100% 100%, 0 100%, 100% 0);
+  z-index: -1;
+}
+#logout {
+  background: pink;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-weight: bold;
+  position: relative;
+  z-index: 11;
+  transition: transform 0.2s ease;
+}
+#logout:active {
+  transform: scale(0.95);
+}
+.container {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 80px;
+  box-sizing: border-box;
+  padding: 0 10px;
+}
+.add-button {
+  width: 50px;
+  height: 50px;
+  background: pink;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: transform 0.2s ease;
+  position: fixed;
+  bottom: 4px;
+  right: 25px;
+}
+.add-button:active {
+  transform: scale(0.95);
+}
+/* Grid Container for Notes */
+#notes-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 10px;
+  width: 100%;
+  animation: fadeIn 0.5s ease;
+}
+/* Note Styles */
+.note {
+  background: white;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  animation: slideIn 0.5s ease;
+}
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  color: #2b1063;
+  font-size: 14px;
+}
+.delete-btn {
+  background: pink;
+  border: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-weight: bold;
+  transition: transform 0.2s ease;
+}
+.delete-btn:active {
+  transform: scale(0.95);
+}
+/* Note Footer: Contains the Public toggle and Copy Link button */
+.note-footer {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #2b1063;
+}
+.note-footer label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.note-footer input[type="checkbox"] {
+  margin-right: 5px;
+  cursor: pointer;
+}
+.copy-link-btn {
+  background: pink;
+  border: none;
+  border-radius: 5px;
+  padding: 3px 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.copy-link-btn:active {
+  transform: scale(0.95);
+}
+/* Textarea Editing Animation */
+.note-content {
+  width: 100%;
+  height: 150px;
+  border: none;
+  resize: none;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  transition: transform 0.3s ease, height 0.3s ease;
+}
+.note-content:focus {
+  transform: scale(1.05);
+  height: 200px;
+}
+.note-content:focus:invalid {
+  outline: 2px solid red;
+}
+/* Modal Styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.5s ease;
+}
+.modal-content {
+  background: linear-gradient(135deg, #6b4fd3, #2b1063);
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  color: white;
+  animation: slideIn 0.5s ease;
+  width: 70%;
+  max-width: 400px;
+}
+.modal-content input {
+  padding: 10px;
+  margin: 10px;
+  border-radius: 5px;
+  border: none;
+  width: 80%;
+  transition: transform 0.2s ease;
+}
+.modal-content input:active {
+  transform: scale(0.95);
+}
+.modal-content .button-container {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  margin: 10px;
+}
+.modal-content button {
+  background: pink;
+  border: none;
+  padding: 10px ;
+  border-radius: 5px;
+  cursor: pointer;
+  margin: 10px;
+  transition: transform 0.2s ease;
+  flex: 1;
+  width: 80%;
+  height: 35px;
+}
+.modal-content .subtext {
+  background: none;
+  color: white;
+  text-decoration: underline;
+  padding: 0;
+  margin-top: 10px;
+}
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes slideDownFadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(20px); }
+}
+.note-delete-animation {
+  animation: slideDownFadeOut 0.5s ease forwards;
+}
