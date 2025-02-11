@@ -34,14 +34,15 @@ Nota is a lightweight note-taking web application that allows users to create, e
 ## File Structure
 ```
 nota/
-│── index.html        # Main frontend file
-│── styles.css        # Styling file
-│── notes.php         # Backend script for handling notes
-│── login.php         # Authentication script
-│── register.php      # User registration script
-│── reset_password.php # Password reset script
-│── logout.php        # Logout handler
-└── config.php        # Database configuration
+│── index.html			# Main frontend file
+│── styles.css			# Styling file
+│── scripts.js			# JavaScript file
+│── notes.php			# Backend script for handling notes
+│── login.php			# Authentication script
+│── register.php		# User registration script
+│── reset_password.php	# Password reset script
+│── logout.php			# Logout handler
+└── config.php			# Database configuration
 ```
 
 ## Usage
