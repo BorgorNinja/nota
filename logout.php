@@ -1,6 +1,3 @@
 <?php
-// logout.php
-session_start();
-session_destroy();
-echo json_encode(['success' => true, 'message' => 'Logged out successfully.']);
-?>
+// Backwards-compatible shim.
+require_once __DIR__ . '/api/auth/logout.php';

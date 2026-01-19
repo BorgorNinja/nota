@@ -91,28 +91,11 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS note_versions (
     INDEX (created_at)
 ) ENGINE=InnoDB");
 
-function columnExists(PDO $pdo, string $table, string $column): bool
-{
-    // Validate identifiers (identifiers cannot be bound as params in MySQL/MariaDB)
-    if (!preg_match("/^[A-Za-z0-9_]+$/", $table) || !preg_match("/^[A-Za-z0-9_]+$/", $column)) {
-        return false;
-    }
-
-    $sql = "
-        SELECT 1
-        FROM information_schema.COLUMNS
-        WHERE TABLE_SCHEMA = DATABASE()
-          AND TABLE_NAME = ?
-          AND COLUMN_NAME = ?
-        LIMIT 1
-    ";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([$table, $column]);
-
-    return (bool)$stmt->fetchColumn();
+function columnExists(PDO $pdo, string $table, string $column): bool {
+    $stmt = $pdo->prepare("SHOW COLUMNS FROM `$table` LIKE ?");
+    $stmt->execute([$column]);
+    return $stmt->fetch() !== false;
 }
-
-
 
 // Lightweight migrations for existing installs.
 if (!columnExists($pdo, 'notes', 'title')) {
